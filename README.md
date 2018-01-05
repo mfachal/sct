@@ -26,10 +26,11 @@ cc -std=c99 -O2 -I /usr/X11R6/include -o sct sct.c -L /usr/X11R6/lib -lm -lX11 -
 Execute sct using the following command:
 
 ~~~
-./sct 3700
+./sct 3700 0.7
 ~~~
 
 The first parameter (`3700` above) denotes the color temperature and can be
 between `1000` and `10000`.
+The second one is brightness.
 If `sct` is called without parameters, sct sets the color temperature to `6500`.
 
