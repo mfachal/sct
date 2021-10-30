@@ -21,6 +21,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
@@ -29,6 +30,7 @@
 
 /* cribbed from redshift, but truncated with 500K steps */
 static const struct { float r; float g; float b; } whitepoints[] = {
+	{ 1.0, 0.0, 0.0},
 	{ 1.00000000,  0.18172716,  0.00000000, }, /* 1000K */
 	{ 1.00000000,  0.42322816,  0.00000000, },
 	{ 1.00000000,  0.54360078,  0.08679949, },
@@ -57,7 +59,7 @@ sct_for_screen(Display *dpy, int screen, int temp, double brightness)
 	Window root = RootWindow(dpy, screen);
 	XRRScreenResources *res = XRRGetScreenResourcesCurrent(dpy, root);
 
-	temp -= 1000;
+	temp -= 500;
 	double ratio = temp % 500 / 500.0;
 #define AVG(c) whitepoints[temp / 500].c * (1 - ratio) + whitepoints[temp / 500 + 1].c * ratio
 	double gammar = brightness * AVG(r);
@@ -96,19 +98,22 @@ main(int argc, char **argv)
 	int screens = XScreenCount(dpy);
 
 	int temp = 6500;
-	if (argc > 1)
+	if (argc > 1) {
 		temp = atoi(argv[1]);
-	if (temp < 1000 || temp > 10000)
+		if (strcmp(argv[1], "-r") == 0)
+			temp = 500;
+	}
+	if (temp < 500 || temp > 10000)
 		temp = 6500;
 
-        double brightness = 1.0;
-        if (argc > 2)
-                brightness = atof(argv[2]);
-        if (brightness < 0.1 || brightness > 1.0)
-                brightness = 1.0;
-	
+	double brightness = 1.0;
+	if (argc > 2)
+		brightness = atof(argv[2]);
+	if (brightness < 0.1 || brightness > 1.0)
+		brightness = 1.0;
+
 	for (int screen = 0; screen < screens; screen++)
-	  sct_for_screen(dpy, screen, temp, brightness);
+		sct_for_screen(dpy, screen, temp, brightness);
 
 	XCloseDisplay(dpy);
 
